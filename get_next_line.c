@@ -6,7 +6,7 @@
 /*   By: shaas <shaas@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/20 16:44:50 by shaas             #+#    #+#             */
-/*   Updated: 2021/09/21 13:48:28 by shaas            ###   ########.fr       */
+/*   Updated: 2021/09/21 16:20:13 by shaas            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,17 +16,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-char	*free_helper(char *str1, char *str2, char *str3)
+char	*free_helper(char **str1, char **str2, char **str3)
 {
 	if (str1)
-		free (str1);
-	str1 = NULL;
+	{
+		free (*str1);
+		*str1 = NULL;
+	}
 	if (str2)
-		free (str2);
-	str2 = NULL;
+	{
+		free (*str2);
+		*str2 = NULL;
+	}
 	if (str3)
-		free (str3);
-	str3 = NULL;
+	{
+		free (*str3);
+		*str3 = NULL;
+	}
 	return (NULL);
 }
 
@@ -81,7 +87,7 @@ char	*ft_linejoin(char *old_line, char *add)
 	len_2 = ft_strlen(add);
 	new_line = (char *)malloc(sizeof(char) * (len_1 + len_2 + 1));
 	if (!new_line)
-		return (free_helper(old_line, add, NULL));
+		return (free_helper(&old_line, &add, NULL));
 	while (old_line[j] != '\0')
 		new_line[i++] = old_line[j++];
 	while (*add != '\0')
@@ -96,6 +102,8 @@ int	ft_find_newline(char *buffer)
 	int	i;
 
 	i = 0;
+	if (buffer == NULL)
+		return (-1);
 	while (buffer[i] != '\0')
 	{
 		if (buffer[i] == '\n')
@@ -113,62 +121,83 @@ char	*get_next_line(int fd)
 	int			bytes_read;
 	int			newline;
 
+	newline = ft_find_newline(remainder);
+	if (newline != -1) // this is for the case that the entire line is contained in the remainder
+	{
+		line = ft_substr(remainder, 0, (newline + 1));
+		if (!line)
+			return (free_helper(&line, &remainder, NULL));
+		buffer = ft_substr(remainder, (newline + 1), BUFFER_SIZE); // literally a buffer for the rest of the string
+		if (!buffer)
+			return (free_helper(&line, &remainder, NULL));
+		free (remainder);
+		remainder = ft_substr(buffer, 0, BUFFER_SIZE);
+		if (!remainder)
+			return (free_helper(&line, &remainder, &buffer));
+		free (buffer);
+		return (line);
+	}
 	buffer = (char *)malloc((sizeof(char) * BUFFER_SIZE) + 1);
 	line = (char *)malloc(sizeof(char) * 1);
 	if (!buffer || !line || fd < 0)
-		return (free_helper(remainder, buffer, line));
+		return (free_helper(&remainder, &buffer, &line));
 	line[0] = '\0';
 	line = ft_linejoin(line, remainder);
 	if (!line)
-		return (free_helper(buffer, NULL, NULL));
-	free_helper(remainder, NULL, NULL);
+		return (free_helper(&buffer, NULL, NULL));
+	free_helper(&remainder, NULL, NULL);
 	while (1)
 	{
 		bytes_read = read(fd, buffer, BUFFER_SIZE);
 		if (bytes_read < 0) // read fail
-			return (free_helper(remainder, buffer, line));
+			return (free_helper(&remainder, &buffer, &line));
 		if (bytes_read == 0) // it's the case when we're at EOF
-			return (NULL);
+		{
+			free_helper(&buffer, NULL, NULL);
+			if (ft_strlen(line) != 0) // case where there was still a remainder
+				return (line);
+			return (free_helper(&line, NULL, NULL));
+		}
 		buffer[bytes_read] = '\0';
 		newline = ft_find_newline(buffer);
 		if (newline != -1) // case when we're at end of line
 		{
 			remainder = ft_substr(buffer, 0, (newline + 1)); // this is what is to be added. remainder is used as a spare pointer, it's not actually the remainder in this case. rather the exact opposite, the end of the line.// not sure if newline + 1 is correct size -> checked, it is.
 			if (!remainder)
-				return (free_helper(remainder, buffer, line));
+				return (free_helper(&remainder, &buffer, &line));
 			line = ft_linejoin(line, remainder);
 			if (!line)
-				return (free_helper(buffer, NULL, NULL));
+				return (free_helper(&buffer, NULL, NULL));
 			free (remainder);
 			remainder = ft_substr(buffer, (newline + 1), BUFFER_SIZE);
 			if (!remainder)
-				return (free_helper(remainder, buffer, line));
+				return (free_helper(&remainder, &buffer, &line));
 			break ;
 		}
 		line = ft_linejoin(line, buffer);
 		if (!line)
-			return (free_helper(buffer, NULL, NULL));
-		//printf("%s\n", line); //testing
+			return (free_helper(&buffer, NULL, NULL));
 	}
 	free (buffer);
 	return (line);
 }
 
-int	main()
-{
-	int		fd_1;
-	int		fd_2;
-	char	*line;
-
-	fd_1 = open("test.txt", O_RDONLY);
-	fd_2 = open("get_next_line.c", O_RDONLY);
-	while ((line = get_next_line(fd_1)) != NULL)
-	{
-		printf("[%s]\n", line);
-		free (line);
-	}
-	printf("[%s]", line);
-	close(fd_1);
-	close(fd_2);
-	free(line);
-}
+//int	main(void)
+//{
+//	int		fd_1;
+//	int		fd_2;
+//	char	*line;
+//
+//	fd_1 = open("test.txt", O_RDONLY);
+//	fd_2 = open("get_next_line.c", O_RDONLY);
+//	while ((line = get_next_line(fd_1)) != NULL)
+//	{
+//		printf("[%s]\n", line);
+//		free (line);
+//		//printf("here\n"); //testing
+//	}
+//	printf("[%s]", line);
+//	close(fd_1);
+//	close(fd_2);
+//	free(line);
+//}
