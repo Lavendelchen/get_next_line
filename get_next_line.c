@@ -6,7 +6,7 @@
 /*   By: shaas <shaas@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/20 16:44:50 by shaas             #+#    #+#             */
-/*   Updated: 2021/09/20 17:54:38 by shaas            ###   ########.fr       */
+/*   Updated: 2021/09/21 13:48:28 by shaas            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ char	*get_next_line(int fd)
 	char		*line;
 	int			bytes_read;
 	int			newline;
+
 	buffer = (char *)malloc((sizeof(char) * BUFFER_SIZE) + 1);
 	line = (char *)malloc(sizeof(char) * 1);
 	if (!buffer || !line || fd < 0)
