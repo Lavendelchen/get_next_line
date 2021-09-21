@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_bonus.c                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: shaas <shaas@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/20 16:44:50 by shaas             #+#    #+#             */
-/*   Updated: 2021/09/21 18:13:38 by shaas            ###   ########.fr       */
+/*   Updated: 2021/09/21 18:11:53 by shaas            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 char	*ft_free_helper(char **str1, char **str2, char **str3)
 {
@@ -131,7 +132,7 @@ char	*ft_split_remainder_1(char **line, char **remainder, char **buffer, int new
 
 char	*ft_split_remainder_2(char **line, char **remainder, char **buffer, int newline)
 {
-	*remainder = ft_substr(*buffer, 0, (newline + 1)); // this is what is to be added. remainder is used as a spare pointer, it's not actually the remainder in this case. rather the exact opposite, the end of the line.// not sure if newline + 1 is correct size -> checked, it is.
+	*remainder = ft_substr(*buffer, 0, (newline + 1)); // this is what is to be added. remainder[fd] is used as a spare pointer, it's not actually the remainder[fd] in this case. rather the exact opposite, the end of the line.// not sure if newline + 1 is correct size -> checked, it is.
 	if (!(*remainder))
 		return (ft_free_helper(remainder, buffer, line));
 	*line = ft_linejoin(*line, *remainder);
@@ -158,7 +159,7 @@ char	*ft_read(int fd, char **remainder, char **buffer, char **line)
 		if (bytes_read == 0) // it's the case when we're at EOF
 		{
 			ft_free_helper(buffer, NULL, NULL);
-			if (ft_strlen(*line) != 0) // case where there was still a remainder
+			if (ft_strlen(*line) != 0) // case where there was still a remainder[fd]
 				return (*line);
 			return (ft_free_helper(line, NULL, NULL));
 		}
@@ -174,24 +175,24 @@ char	*ft_read(int fd, char **remainder, char **buffer, char **line)
 
 char	*get_next_line(int fd)
 {
-	static char	*remainder;
+	static char	*remainder[OPEN_MAX];
 	char		*buffer;
 	char		*line;
 	int			newline;
 
-	newline = ft_find_newline(remainder);
-	if (newline != -1) // this is for the case that the entire line is contained in the remainder
-		return (ft_split_remainder_1(&line, &remainder, &buffer, newline));
+	newline = ft_find_newline(remainder[fd]);
+	if (newline != -1) // this is for the case that the entire line is contained in the remainder[fd]
+		return (ft_split_remainder_1(&line, &remainder[fd], &buffer, newline));
 	buffer = (char *)malloc((sizeof(char) * BUFFER_SIZE) + 1);
 	line = (char *)malloc(sizeof(char) * 1);
 	if (!buffer || !line || fd < 0)
-		return (ft_free_helper(&remainder, &buffer, &line));
+		return (ft_free_helper(&remainder[fd], &buffer, &line));
 	line[0] = '\0';
-	line = ft_linejoin(line, remainder);
+	line = ft_linejoin(line, remainder[fd]);
 	if (!line)
 		return (ft_free_helper(&buffer, NULL, NULL));
-	ft_free_helper(&remainder, NULL, NULL);
-	return (ft_read(fd, &remainder, &buffer, &line));
+	ft_free_helper(&remainder[fd], NULL, NULL);
+	return (ft_read(fd, &remainder[fd], &buffer, &line));
 }
 
 //int	main(void)
@@ -213,5 +214,3 @@ char	*get_next_line(int fd)
 //	close(fd_2);
 //	free(line);
 //}
-
-//stuff to do: make makefile, header correct, split functions in utils file, rm comments(save them in other file)
