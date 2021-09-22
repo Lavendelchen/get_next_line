@@ -6,15 +6,13 @@
 /*   By: shaas <shaas@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/20 16:44:50 by shaas             #+#    #+#             */
-/*   Updated: 2021/09/21 18:13:38 by shaas            ###   ########.fr       */
+/*   Updated: 2021/09/22 13:34:22 by shaas            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <unistd.h> // read
+#include <stdlib.h>  // malloc, free
+#include <stdio.h> // testing
 
 char	*ft_free_helper(char **str1, char **str2, char **str3)
 {

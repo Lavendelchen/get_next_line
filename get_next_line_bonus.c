@@ -6,16 +6,14 @@
 /*   By: shaas <shaas@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/09/20 16:44:50 by shaas             #+#    #+#             */
-/*   Updated: 2021/09/21 18:11:53 by shaas            ###   ########.fr       */
+/*   Updated: 2021/09/22 13:35:03 by shaas            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
+#include <unistd.h> // read
+#include <stdlib.h>  // malloc, free
+#include <limits.h> // OPEN_MAX
+#include <stdio.h> // testing
 
 char	*ft_free_helper(char **str1, char **str2, char **str3)
 {
